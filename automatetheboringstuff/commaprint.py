@@ -11,3 +11,6 @@ def comma_print(my_list):
     return _output
 
 print(comma_print(test_list))
+
+
+#Simpler Method via ', '.join(test_list) 

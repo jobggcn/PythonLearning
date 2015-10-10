@@ -5,7 +5,7 @@ import openpyxl, sys, os
 
 
 def insert_blank_lines(file_name, insert_from, gap):
-    #This implementation moves lower rows instead of copying them to memory and writing them again
+    #This implementation moves lower rows instead of copying the table to memory and rewriting it with a gap
     #I'm fairly certain that this is less memory intensive and maybe even a little faster
     workbook = openpyxl.load_workbook(file_name)
     sheet = workbook.get_active_sheet()

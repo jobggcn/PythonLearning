@@ -1,0 +1,54 @@
+#Excercise 1 Chapter 14
+#Excel to csv converter 
+
+import openpyxl, csv, os, sys 
+#temp
+import pprint 
+
+
+def get_xlsx_files():
+    list_of_files = os.listdir('.') #get all files from cwd 
+    list_of_files = [_file for _file in list_of_files if _file.endswith('.xlsx')] 
+    return list_of_files 
+
+def get_highest_column(columns): #Fix for libre office weirdness
+    column_values = [[cell.value for cell in column] for column in columns] #Convert cells into values
+    for index in reversed(range(len(column_values))):
+        if not all(x is None for x in column_values[index]):
+            return index
+
+def get_cell_data(xlsx_file):
+    workbook = openpyxl.load_workbook(xlsx_file)
+    sheet_names = workbook.get_sheet_names() 
+    #cell_data = {"sheet1": [[],[],[]],"sheet2":...} 
+    cell_data = {} 
+    for sheet_name in sheet_names:
+        sheet = workbook.get_sheet_by_name(sheet_name) # get sheet object
+        sheet_width = get_highest_column(sheet.columns) # get actual column#
+        #really complex list comprehension which converts cell objects into their values by rows in sheet
+        cell_data[sheet_name] = [[cell.value for cell in row[0:sheet_width + 1]] for row in sheet.rows]
+    return cell_data 
+
+def output_csv_files(directory, xlsx_file, cell_data): #works on a per xlsx file basis 1(xlsx file) : n(csv file) 
+    xlsx_filename = os.path.splitext( os.path.basename(xlsx_file) )[0] #gets filename before .xlsx extension  
+
+    for sheet_name, data in cell_data.items(): 
+        csv_filename = os.path.join(directory, '{}_{}.csv'.format(xlsx_filename, sheet_name))
+        csv_file = open(csv_filename, 'w', newline = '')
+        csv_writer = csv.writer(csv_file) 
+        for row in data: #write csv file
+            csv_writer.writerow(row)
+        csv_file.close() 
+
+def xlsxtocsv():
+    dest_directory = 'converted csv files' 
+    if not os.path.isdir(dest_directory):
+        os.makedirs(dest_directory) 
+    
+    xlsx_files = get_xlsx_files() 
+    for xlsx_file in xlsx_files:
+        output_csv_files(dest_directory, xlsx_file, get_cell_data(xlsx_file))
+        
+xlsxtocsv() 
+
+
